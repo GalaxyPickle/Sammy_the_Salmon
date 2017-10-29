@@ -11,3 +11,6 @@ As many fish are, Salmon are overfished, and sadly the majority of Salmon specie
 This game is intended to be a fun, educational gaze into the life of the famously named leaping fish, the Salmon.
 
 For reasons to care about Salmon, visit: https://www.wildsalmoncenter.org/work/why-protect-salmon/
+
+
+https://www.seattletimes.com/nation-world/lonesome-larrys-legacy-lives-on-in-salmons-rebound/
