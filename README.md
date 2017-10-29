@@ -5,5 +5,5 @@ Salmon can live in both freshwater and saltwater in their lifetime, making an ar
 (https://en.wikipedia.org/wiki/Salmon)
 
 As many fish are, Salmon are overfished, and sadly the majority of Salmon species on all continents are considered endangered.
-This game is intended to be a fun, educational gaze into the life of the famously leaping Salmon.
+This game is intended to be a fun, educational gaze into the life of the famously named leaping fish, the Salmon.
 (http://www.stateofthesalmon.org/resources/endangered_listings/)
