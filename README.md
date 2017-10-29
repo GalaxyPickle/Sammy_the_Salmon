@@ -1,4 +1,4 @@
-# Sammy_the_Salmon
+# Sammy the Salmon
 A 3D game about being a salmon who makes the incredible journey from the ocean back up to his spawning grounds.
 
 Salmon can live in both freshwater and saltwater in their lifetime, making an arduous and epic journey from the ocean back up a river to their spawning grounds.
