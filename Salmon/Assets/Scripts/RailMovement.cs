@@ -14,7 +14,7 @@ public class RailMovement : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if (Input.GetKeyUp (KeyCode.Space)) {
+		if (Input.GetButtonDown("Submit")) {
 			move = !move;
 		}
 		if (move) {
