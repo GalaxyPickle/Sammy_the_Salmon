@@ -3,12 +3,12 @@
 # Weird Mac thing
 .DS_Store
 
-/[Ll]ibrary/
-/[Tt]emp/
-/[Oo]bj/
-/[Bb]uild/
-/[Bb]uilds/
-/Assets/AssetStoreTools*
+/Salmon/[Ll]ibrary/
+/Salmon/[Tt]emp/
+/Salmon/[Oo]bj/
+/Salmon/[Bb]uild/
+/Salmon/[Bb]uilds/
+/Salmon/Assets/AssetStoreTools*
 
 # Visual Studio 2015 cache directory
 /.vs/
