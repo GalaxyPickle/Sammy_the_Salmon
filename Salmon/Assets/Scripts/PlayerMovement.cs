@@ -47,10 +47,10 @@ public class PlayerMovement : MonoBehaviour {
 		var velocity = rb.velocity;
 		if (jumpingUp) {
 			// Going up
+      
 
 			// Time to stop
 			if (pos.y < Y_WATER_LEVEL && velocity.y < 0) {
-				jumpAirElapsed = 0;
 				jumpHeldTime = 0;
 				jumpingUp = false;
 				jumpStarted = false;
