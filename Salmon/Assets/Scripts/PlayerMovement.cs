@@ -5,19 +5,21 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour {
 
 	public int MOVESPEED;
-	public float Y_MAX_OFFSET;
 	public float Y_WATER_LEVEL;
 	public float Y_MIN_OFFSET;
 	public float Z_LEVEL;
 	public float JUMP_MAX_HOLD_SECONDS;
 	public float JUMP_SECONDS_TO_MAX_HEIGHT;
+	public float JUMP_MAX_VELOCITY;
+	public float JUMP_MIN_VELOCITY;
 	public GameObject rail;
 	
 	// The time the jump button has been held down
 	private float jumpHeldTime = 0;
-	private float jumpAirElapsed = 0;
 	private bool jumpingUp = false;
 	private bool jumpStarted = false;
+	private EasingFunction.Function JUMP_DOWN_EASE = EasingFunction.GetEasingFunction(EasingFunction.Ease.EaseInQuad);
+	private EasingFunction.Function JUMP_UP_EASE = EasingFunction.GetEasingFunction(EasingFunction.Ease.EaseOutQuad);
 
 	// Use this for initialization
 	void Start () {
@@ -41,18 +43,18 @@ public class PlayerMovement : MonoBehaviour {
 		}
 		
 		// Process jump
+		var rb = GetComponent<Rigidbody>();
+		var velocity = rb.velocity;
 		if (jumpingUp) {
 			// Going up
-			jumpAirElapsed += Time.deltaTime;
-			float percentHeld = jumpHeldTime / JUMP_MAX_HOLD_SECONDS;
-			float maxTime = percentHeld * JUMP_SECONDS_TO_MAX_HEIGHT;
-			
+
 			// Time to stop
-			if (jumpAirElapsed > maxTime) {
+			if (pos.y < Y_WATER_LEVEL && velocity.y < 0) {
 				jumpAirElapsed = 0;
 				jumpHeldTime = 0;
 				jumpingUp = false;
 				jumpStarted = false;
+				pos.y = Y_WATER_LEVEL;
 			}
 		} else {
 			// Going down
@@ -62,7 +64,8 @@ public class PlayerMovement : MonoBehaviour {
 				jumpStarted = true;
 				jumpHeldTime += Time.deltaTime;
 				percentHeld = jumpHeldTime / JUMP_MAX_HOLD_SECONDS;
-				pos.y = Y_WATER_LEVEL - Y_MIN_OFFSET * percentHeld;
+								
+				pos.y = JUMP_DOWN_EASE(Y_WATER_LEVEL - Y_MIN_OFFSET, Y_WATER_LEVEL, (1 - percentHeld));
 			}
 			
 			// Time to stop jumping
@@ -70,19 +73,12 @@ public class PlayerMovement : MonoBehaviour {
 			    || (jumpHeldTime > JUMP_MAX_HOLD_SECONDS)) {
 				jumpingUp = true;
 				
-				// Set velocity y = 1/2*a*t^2 +v0*t + y0
-				// v0 = (y - 1/2*a*t^2 - y0)/t
-				var rb = GetComponent<Rigidbody>();
-				var velocity = rb.velocity;
 				percentHeld = jumpHeldTime / JUMP_MAX_HOLD_SECONDS;
-				float maxHeight = percentHeld * Y_MAX_OFFSET;
-				float maxTime = percentHeld * JUMP_SECONDS_TO_MAX_HEIGHT;
-				velocity.y = ((maxHeight + Y_WATER_LEVEL)
-				                 -0.5f*Physics.gravity.y*maxTime*maxTime
-				                 -pos.y)/maxTime;
-				rb.velocity = velocity;
+				velocity.y = JUMP_UP_EASE(JUMP_MIN_VELOCITY, JUMP_MAX_VELOCITY, percentHeld);
+				Debug.Log(velocity.y);
 			}
 		}
+		rb.velocity = velocity;
 		
 		// Update position
 		transform.position = pos;
