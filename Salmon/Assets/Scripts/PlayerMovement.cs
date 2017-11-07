@@ -4,22 +4,25 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour {
 
-	public int MOVESPEED;
-	public float Y_WATER_LEVEL;
-	public float Y_MIN_OFFSET;
-	public float Z_LEVEL;
-	public float JUMP_MAX_HOLD_SECONDS;
-	public float JUMP_SECONDS_TO_MAX_HEIGHT;
-	public float JUMP_MAX_VELOCITY;
-	public float JUMP_MIN_VELOCITY;
+  public float Y_WATER_LEVEL;
+  public float Y_MIN_OFFSET;
+  public float Z_LEVEL;
+  public float JUMP_MAX_HOLD_SECONDS;
+  public float JUMP_SECONDS_TO_MAX_HEIGHT;
+  public float JUMP_MAX_VELOCITY;
+  public float JUMP_MIN_VELOCITY;
+	public float MOVE_MAXSPEED;
+  public float MOVE_SECONDS_TO_MAX_SPEED;
 	public GameObject rail;
 	
 	// The time the jump button has been held down
 	private float jumpHeldTime = 0;
+  private float moveHeldTime = 0;
 	private bool jumpingUp = false;
 	private bool jumpStarted = false;
 	private EasingFunction.Function JUMP_DOWN_EASE = EasingFunction.GetEasingFunction(EasingFunction.Ease.EaseInQuad);
 	private EasingFunction.Function JUMP_UP_EASE = EasingFunction.GetEasingFunction(EasingFunction.Ease.EaseOutQuad);
+  private EasingFunction.Function MOVE_EASE_IN = EasingFunction.GetEasingFunction(EasingFunction.Ease.EaseInQuad);
 
 	// Use this for initialization
 	void Start () {
@@ -30,21 +33,35 @@ public class PlayerMovement : MonoBehaviour {
 	// Update is called once per frame
 	void Update()
 	{
-		var x = Input.GetAxis("Horizontal") * Time.deltaTime * MOVESPEED;
-		transform.Translate(x, 0, 0);
+		// var x = Input.GetAxis("Horizontal") * Time.deltaTime * MOVESPEED;
+  //   transform.Translate(x, 0, 0);
 
-		// lock player movement onto forward and sideways axes
-		Vector3 pos = transform.position;
-		pos.z = rail.transform.position.z + Z_LEVEL;
-		
-		// Snap to water level
-		if (!jumpStarted && pos.y < Y_WATER_LEVEL) {
-			pos.y = Y_WATER_LEVEL;
-		}
-		
-		// Process jump
-		var rb = GetComponent<Rigidbody>();
-		var velocity = rb.velocity;
+    // lock player movement onto forward and sideways axes
+    Vector3 pos = transform.position;
+    pos.z = rail.transform.position.z + Z_LEVEL;
+    
+    // Snap to water level
+    if (!jumpStarted && pos.y < Y_WATER_LEVEL) {
+      pos.y = Y_WATER_LEVEL;
+    }
+    
+    // Physics!
+    var rb = GetComponent<Rigidbody>();
+    var velocity = rb.velocity;
+    
+    // Horizontal movement
+    if (Input.GetAxis("Horizontal") != 0) {
+      moveHeldTime += Time.deltaTime;
+      float percentHeld = Mathf.Clamp01(moveHeldTime / MOVE_SECONDS_TO_MAX_SPEED);
+      
+      
+      velocity.x = MOVE_EASE_IN(-MOVE_MAXSPEED, MOVE_MAXSPEED, percentHeld);
+    } else {
+      moveHeldTime = 0;
+    }
+    Debug.Log(velocity.x);
+    
+    // Process jump
 		if (jumpingUp) {
 			// Going up
       
@@ -79,7 +96,7 @@ public class PlayerMovement : MonoBehaviour {
 				
 				percentHeld = jumpHeldTime / JUMP_MAX_HOLD_SECONDS;
 				velocity.y = JUMP_UP_EASE(JUMP_MIN_VELOCITY, JUMP_MAX_VELOCITY, percentHeld);
-				Debug.Log(velocity.y);
+				// Debug.Log(velocity.y);
 			}
 		}
 		rb.velocity = velocity;
