@@ -48,6 +48,10 @@ public class PlayerMovement : MonoBehaviour {
 		if (jumpingUp) {
 			// Going up
       
+      // More gravity above water
+      if (pos.y > Y_WATER_LEVEL) {
+        rb.AddForce(0, Physics.gravity.y * 15, 0);
+      }
 
 			// Time to stop
 			if (pos.y < Y_WATER_LEVEL && velocity.y < 0) {
