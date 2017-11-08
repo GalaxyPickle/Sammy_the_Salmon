@@ -7,6 +7,8 @@ public class PlayerMovement : MonoBehaviour {
   public float Y_WATER_LEVEL;
   public float Y_MIN_OFFSET;
   public float Z_LEVEL;
+  public float X_MIN;
+  public float X_MAX;
   public float JUMP_MAX_HOLD_SECONDS;
   public float JUMP_SECONDS_TO_MAX_HEIGHT;
   public float JUMP_MAX_VELOCITY;
@@ -88,6 +90,9 @@ public class PlayerMovement : MonoBehaviour {
     		moveStopSpeed = 0;
     	}
     }
+    
+    // Clamp to sides
+    pos.x = Mathf.Clamp(pos.x, X_MIN, X_MAX);
     
     // Process jump
 		if (jumpingUp) {
