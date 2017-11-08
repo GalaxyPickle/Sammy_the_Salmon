@@ -13,16 +13,20 @@ public class PlayerMovement : MonoBehaviour {
   public float JUMP_MIN_VELOCITY;
 	public float MOVE_MAXSPEED;
   public float MOVE_SECONDS_TO_MAX_SPEED;
+  public float MOVE_SECONDS_TO_STOP;
 	public GameObject rail;
 	
 	// The time the jump button has been held down
 	private float jumpHeldTime = 0;
   private float moveHeldTime = 0;
+  private float moveStopTime = 0;
+  private float moveStopSpeed = 0;
 	private bool jumpingUp = false;
 	private bool jumpStarted = false;
 	private EasingFunction.Function JUMP_DOWN_EASE = EasingFunction.GetEasingFunction(EasingFunction.Ease.EaseInQuad);
 	private EasingFunction.Function JUMP_UP_EASE = EasingFunction.GetEasingFunction(EasingFunction.Ease.EaseOutQuad);
-  private EasingFunction.Function MOVE_EASE_IN = EasingFunction.GetEasingFunction(EasingFunction.Ease.EaseInQuad);
+  private EasingFunction.Function MOVE_EASE_IN = EasingFunction.GetEasingFunction(EasingFunction.Ease.EaseOutQuad);
+  private EasingFunction.Function MOVE_EASE_OUT = EasingFunction.GetEasingFunction(EasingFunction.Ease.Linear);
 
 	// Use this for initialization
 	void Start () {
@@ -33,9 +37,6 @@ public class PlayerMovement : MonoBehaviour {
 	// Update is called once per frame
 	void Update()
 	{
-		// var x = Input.GetAxis("Horizontal") * Time.deltaTime * MOVESPEED;
-  //   transform.Translate(x, 0, 0);
-
     // lock player movement onto forward and sideways axes
     Vector3 pos = transform.position;
     pos.z = rail.transform.position.z + Z_LEVEL;
@@ -51,15 +52,25 @@ public class PlayerMovement : MonoBehaviour {
     
     // Horizontal movement
     if (Input.GetAxis("Horizontal") != 0) {
+    	moveStopTime = 0;
       moveHeldTime += Time.deltaTime;
       float percentHeld = Mathf.Clamp01(moveHeldTime / MOVE_SECONDS_TO_MAX_SPEED);
+      velocity.x = MOVE_EASE_IN(0, MOVE_MAXSPEED, percentHeld);
       
-      
-      velocity.x = MOVE_EASE_IN(-MOVE_MAXSPEED, MOVE_MAXSPEED, percentHeld);
+      if (Input.GetAxis("Horizontal") < 0) {
+      	velocity.x = -velocity.x;
+      }
+      moveStopSpeed = velocity.x;
     } else {
       moveHeldTime = 0;
+    	moveStopTime += Time.deltaTime;
+    	float percentHeld = Mathf.Clamp01(moveStopTime / MOVE_SECONDS_TO_STOP);
+  		velocity.x = MOVE_EASE_OUT(0, moveStopSpeed, (1 - percentHeld));
+    	
+    	if (velocity.x == 0) {
+    		moveStopSpeed = 0;
+    	}
     }
-    Debug.Log(velocity.x);
     
     // Process jump
 		if (jumpingUp) {
@@ -84,7 +95,7 @@ public class PlayerMovement : MonoBehaviour {
 			if (Input.GetButton("Jump")) {
 				jumpStarted = true;
 				jumpHeldTime += Time.deltaTime;
-				percentHeld = jumpHeldTime / JUMP_MAX_HOLD_SECONDS;
+				percentHeld = Mathf.Clamp01(jumpHeldTime / JUMP_MAX_HOLD_SECONDS);
 								
 				pos.y = JUMP_DOWN_EASE(Y_WATER_LEVEL - Y_MIN_OFFSET, Y_WATER_LEVEL, (1 - percentHeld));
 			}
@@ -94,7 +105,7 @@ public class PlayerMovement : MonoBehaviour {
 			    || (jumpHeldTime > JUMP_MAX_HOLD_SECONDS)) {
 				jumpingUp = true;
 				
-				percentHeld = jumpHeldTime / JUMP_MAX_HOLD_SECONDS;
+				percentHeld = Mathf.Clamp01(jumpHeldTime / JUMP_MAX_HOLD_SECONDS);
 				velocity.y = JUMP_UP_EASE(JUMP_MIN_VELOCITY, JUMP_MAX_VELOCITY, percentHeld);
 				// Debug.Log(velocity.y);
 			}

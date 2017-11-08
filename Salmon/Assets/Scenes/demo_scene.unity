@@ -391,7 +391,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bbe0f7b1ec5be4dd48442e78152912a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MOVESPEED: 0
   Y_WATER_LEVEL: 28
   Y_MIN_OFFSET: 2.5
   Z_LEVEL: 4
@@ -399,6 +398,9 @@ MonoBehaviour:
   JUMP_SECONDS_TO_MAX_HEIGHT: 2
   JUMP_MAX_VELOCITY: 17
   JUMP_MIN_VELOCITY: 4
+  MOVE_MAXSPEED: 6
+  MOVE_SECONDS_TO_MAX_SPEED: 0.3
+  MOVE_SECONDS_TO_STOP: 0.1
   rail: {fileID: 1945476300}
 --- !u!23 &961139530
 MeshRenderer:
@@ -802,7 +804,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1956166824}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 572.5, y: 303.5, z: 0}
+  m_LocalPosition: {x: 571.5, y: 301.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1518118156}
