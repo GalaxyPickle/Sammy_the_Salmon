@@ -14,6 +14,7 @@ public class PlayerMovement : MonoBehaviour {
 	public float MOVE_MAXSPEED;
   public float MOVE_SECONDS_TO_MAX_SPEED;
   public float MOVE_SECONDS_TO_STOP;
+  public float MOVE_SPEED_PERCENT_ABOVE_WATER;
 	public GameObject rail;
 	
 	// The time the jump button has been held down
@@ -23,6 +24,8 @@ public class PlayerMovement : MonoBehaviour {
   private float moveStopSpeed = 0;
 	private bool jumpingUp = false;
 	private bool jumpStarted = false;
+	private bool aboveWater = false;
+	private bool underWater = false;
 	private EasingFunction.Function JUMP_DOWN_EASE = EasingFunction.GetEasingFunction(EasingFunction.Ease.EaseInQuad);
 	private EasingFunction.Function JUMP_UP_EASE = EasingFunction.GetEasingFunction(EasingFunction.Ease.EaseOutQuad);
   private EasingFunction.Function MOVE_EASE_IN = EasingFunction.GetEasingFunction(EasingFunction.Ease.EaseOutQuad);
@@ -41,8 +44,19 @@ public class PlayerMovement : MonoBehaviour {
     Vector3 pos = transform.position;
     pos.z = rail.transform.position.z + Z_LEVEL;
     
+    if (pos.y < Y_WATER_LEVEL) {
+	    underWater = true;
+	    aboveWater = false;
+    } else if (pos.y > Y_WATER_LEVEL) {
+    	underWater = false;
+	    aboveWater = true;
+    } else {
+    	underWater = false;
+	    aboveWater = false;
+    }
+    
     // Snap to water level
-    if (!jumpStarted && pos.y < Y_WATER_LEVEL) {
+    if (!jumpStarted && underWater) {
       pos.y = Y_WATER_LEVEL;
     }
     
@@ -55,6 +69,9 @@ public class PlayerMovement : MonoBehaviour {
     	moveStopTime = 0;
       moveHeldTime += Time.deltaTime;
       float percentHeld = Mathf.Clamp01(moveHeldTime / MOVE_SECONDS_TO_MAX_SPEED);
+      if (aboveWater && percentHeld > MOVE_SPEED_PERCENT_ABOVE_WATER) {
+      	percentHeld = MOVE_SPEED_PERCENT_ABOVE_WATER;
+      }
       velocity.x = MOVE_EASE_IN(0, MOVE_MAXSPEED, percentHeld);
       
       if (Input.GetAxis("Horizontal") < 0) {
@@ -77,12 +94,12 @@ public class PlayerMovement : MonoBehaviour {
 			// Going up
       
       // More gravity above water
-      if (pos.y > Y_WATER_LEVEL) {
+      if (aboveWater) {
         rb.AddForce(0, Physics.gravity.y * 15, 0);
       }
 
 			// Time to stop
-			if (pos.y < Y_WATER_LEVEL && velocity.y < 0) {
+			if (underWater && velocity.y < 0) {
 				jumpHeldTime = 0;
 				jumpingUp = false;
 				jumpStarted = false;
