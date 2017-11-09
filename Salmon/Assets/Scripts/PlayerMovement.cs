@@ -4,14 +4,14 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour {
 
-	public AudioClip splash_general;
+	public AudioClip splash_submerge;
+	public AudioClip splash_jump;
 	public AudioClip splash_land;
 	public AudioClip splat;
 	public AudioSource audiosource;
 
-	public ParticleSystem particle_system;
-
-	float timeLeft = 300.0f;
+	public ParticleSystem particle_system_splash;
+	public ParticleSystem particle_system_water_movement;
 
 	public float Y_WATER_LEVEL;
 	public float Y_MIN_OFFSET;
@@ -79,27 +79,39 @@ public class PlayerMovement : MonoBehaviour {
 	    
 	    // Horizontal movement
 	    if (Input.GetAxis("Horizontal") != 0) {
-	    	moveStopTime = 0;
-	      moveHeldTime += Time.deltaTime;
-	      float percentHeld = Mathf.Clamp01(moveHeldTime / MOVE_SECONDS_TO_MAX_SPEED);
-	      if (aboveWater && percentHeld > MOVE_SPEED_PERCENT_ABOVE_WATER) {
-	      	percentHeld = MOVE_SPEED_PERCENT_ABOVE_WATER;
-	      }
-	      velocity.x = MOVE_EASE_IN(0, MOVE_MAXSPEED, percentHeld);
-	      
-	      if (Input.GetAxis("Horizontal") < 0) {
-	      	velocity.x = -velocity.x;
-	      }
-	      moveStopSpeed = velocity.x;
-	    } else {
-	      moveHeldTime = 0;
-	    	moveStopTime += Time.deltaTime;
-	    	float percentHeld = Mathf.Clamp01(moveStopTime / MOVE_SECONDS_TO_STOP);
-	  		velocity.x = MOVE_EASE_OUT(0, moveStopSpeed, (1 - percentHeld));
-	    	
-	    	if (velocity.x == 0) {
-	    		moveStopSpeed = 0;
-	    	}
+			moveStopTime = 0;
+			moveHeldTime += Time.deltaTime;
+			float percentHeld = Mathf.Clamp01(moveHeldTime / MOVE_SECONDS_TO_MAX_SPEED);
+
+			if (aboveWater && percentHeld > MOVE_SPEED_PERCENT_ABOVE_WATER) {
+				percentHeld = MOVE_SPEED_PERCENT_ABOVE_WATER;
+			}
+			velocity.x = MOVE_EASE_IN(0, MOVE_MAXSPEED, percentHeld);
+
+			if (Input.GetAxis("Horizontal") < 0) {
+				velocity.x = -velocity.x;
+			}
+			moveStopSpeed = velocity.x;
+
+			// play swim effects
+			if (!aboveWater) {
+				// swim sound
+				if (!audiosource.isPlaying) {
+					audiosource.PlayOneShot (splash_submerge);
+				}
+				// play particles
+//				particle_system_water_movement.Play();
+			}
+	    } 
+		else {
+			moveHeldTime = 0;
+			moveStopTime += Time.deltaTime;
+			float percentHeld = Mathf.Clamp01(moveStopTime / MOVE_SECONDS_TO_STOP);
+			velocity.x = MOVE_EASE_OUT(0, moveStopSpeed, (1 - percentHeld));
+
+			if (velocity.x == 0) {
+				moveStopSpeed = 0;
+			}
 	    }
     
 	    // Clamp to sides
@@ -122,7 +134,9 @@ public class PlayerMovement : MonoBehaviour {
 				pos.y = Y_WATER_LEVEL;
 
 				// EMIT PARTICLES!!!
-				particle_system.Play();
+				particle_system_splash.Play();
+
+				audiosource.PlayOneShot (splash_land);
 			}
 		} 
 		else {
@@ -132,7 +146,7 @@ public class PlayerMovement : MonoBehaviour {
 			if (Input.GetButton("Jump")) {
 				// play jump sound!
 				if (!jumpStarted)
-					audiosource.PlayOneShot(splash_general, 2);
+					audiosource.PlayOneShot(splash_submerge, 2);
 
 				jumpStarted = true;
 				jumpHeldTime += Time.deltaTime;
@@ -146,7 +160,7 @@ public class PlayerMovement : MonoBehaviour {
 			    || (jumpHeldTime > JUMP_MAX_HOLD_SECONDS)) {
 
 				// play land sound?
-				audiosource.PlayOneShot(splash_land);
+				audiosource.PlayOneShot(splash_jump);
 
 				jumpingUp = true;
 				
@@ -155,7 +169,7 @@ public class PlayerMovement : MonoBehaviour {
 				// Debug.Log(velocity.y);
 
 				// PARTICLES!!!
-				particle_system.Play();
+				particle_system_splash.Play();
 			}
 		}
 		rb.velocity = velocity;
@@ -171,7 +185,14 @@ public class PlayerMovement : MonoBehaviour {
 		transform.rotation = rot;
 
 		// track particle system to player position
-		particle_system.transform.position = transform.position;
+		particle_system_splash.transform.position = transform.position;
+		particle_system_water_movement.transform.position = transform.position;
+
+		// stop particles if out of water
+		if (aboveWater) {
+			// stop particle system for movement
+//			particle_system_water_movement.Stop();
+		}
 	}
 
 	void OnCollisionEnter (Collision col) {
