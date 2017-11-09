@@ -163,7 +163,7 @@ public class PlayerMovement : MonoBehaviour {
 	}
 
 	void OnCollisionEnter (Collision col) {
-		if (col.gameObject.name == "Cylinder") {
+		if (col.gameObject.name == "obstacle") {
 			Application.LoadLevel (0);
 			audiosource.PlayOneShot (splat);
 		}
