@@ -4,6 +4,13 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour {
 
+	public AudioClip splash_general;
+	public AudioClip splash_land;
+	public AudioClip splat;
+	public AudioSource audiosource;
+
+	float timeLeft = 300.0f;
+
   public float Y_WATER_LEVEL;
   public float Y_MIN_OFFSET;
   public float Z_LEVEL;
@@ -37,6 +44,8 @@ public class PlayerMovement : MonoBehaviour {
 	void Start () {
 		// hold a copy of the mother rail object for reference
 		rail = GameObject.Find ("Rail");
+
+		audiosource = GetComponent<AudioSource> ();
 	}
 	
 	// Update is called once per frame
@@ -115,6 +124,10 @@ public class PlayerMovement : MonoBehaviour {
 			float percentHeld = 0;
 			// Holding down button
 			if (Input.GetButton("Jump")) {
+				// play jump sound!
+				if (!jumpStarted)
+					audiosource.PlayOneShot(splash_general, 2);
+
 				jumpStarted = true;
 				jumpHeldTime += Time.deltaTime;
 				percentHeld = Mathf.Clamp01(jumpHeldTime / JUMP_MAX_HOLD_SECONDS);
@@ -125,6 +138,10 @@ public class PlayerMovement : MonoBehaviour {
 			// Time to stop jumping
 			if (Input.GetButtonUp("Jump")
 			    || (jumpHeldTime > JUMP_MAX_HOLD_SECONDS)) {
+
+				// play land sound?
+				audiosource.PlayOneShot(splash_land);
+
 				jumpingUp = true;
 				
 				percentHeld = Mathf.Clamp01(jumpHeldTime / JUMP_MAX_HOLD_SECONDS);
@@ -143,5 +160,12 @@ public class PlayerMovement : MonoBehaviour {
 		rot.y = 0;
 		rot.z = 0;
 		transform.rotation = rot;
+	}
+
+	void OnCollisionEnter (Collision col) {
+		if (col.gameObject.name == "Cylinder") {
+			Application.LoadLevel (0);
+			audiosource.PlayOneShot (splat);
+		}
 	}
 }
