@@ -2,6 +2,7 @@
 
 # Weird Mac thing
 .DS_Store
+*/.DS_Store
 
 /Salmon/[Ll]ibrary/
 /Salmon/[Tt]emp/
