@@ -78,7 +78,7 @@ public class PlayerMovement : MonoBehaviour {
 	    var velocity = rb.velocity;
 	    
 	    // Horizontal movement
-	    if (Input.GetAxis("Horizontal") != 0) {
+		if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.RightArrow)) {
 			moveStopTime = 0;
 			moveHeldTime += Time.deltaTime;
 			float percentHeld = Mathf.Clamp01(moveHeldTime / MOVE_SECONDS_TO_MAX_SPEED);
@@ -86,9 +86,9 @@ public class PlayerMovement : MonoBehaviour {
 			if (aboveWater && percentHeld > MOVE_SPEED_PERCENT_ABOVE_WATER) {
 				percentHeld = MOVE_SPEED_PERCENT_ABOVE_WATER;
 			}
-			velocity.x = MOVE_EASE_IN(0, MOVE_MAXSPEED, percentHeld);
+			velocity.x = MOVE_MAXSPEED;
 
-			if (Input.GetAxis("Horizontal") < 0) {
+			if (Input.GetKey(KeyCode.LeftArrow)) {
 				velocity.x = -velocity.x;
 			}
 			moveStopSpeed = velocity.x;
@@ -107,12 +107,13 @@ public class PlayerMovement : MonoBehaviour {
 			moveHeldTime = 0;
 			moveStopTime += Time.deltaTime;
 			float percentHeld = Mathf.Clamp01(moveStopTime / MOVE_SECONDS_TO_STOP);
-			velocity.x = MOVE_EASE_OUT(0, moveStopSpeed, (1 - percentHeld));
-
+			velocity.x = MOVE_EASE_OUT(0, moveStopSpeed, (1-percentHeld));
+			velocity.x = 0;
 			if (velocity.x == 0) {
 				moveStopSpeed = 0;
 			}
 	    }
+		//Debug.Log (Input.GetAxis ("Horizontal"));
     
 	    // Clamp to sides
 	    pos.x = Mathf.Clamp(pos.x, X_MIN, X_MAX);
@@ -193,6 +194,9 @@ public class PlayerMovement : MonoBehaviour {
 			// stop particle system for movement
 //			particle_system_water_movement.Stop();
 		}
+
+		// reset level
+		//if (Input.GetButtonDown("Cancel"));
 	}
 
 	void OnCollisionEnter (Collision col) {
